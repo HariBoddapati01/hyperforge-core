@@ -24,7 +24,7 @@ provider "aws" {
 
   default_tags {
     tags = {
-      project    = "hv-testbed"
+      project    = "hyperforge"
       managed-by = "terraform"
     }
   }

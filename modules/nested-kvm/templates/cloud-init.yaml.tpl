@@ -1,6 +1,6 @@
 #cloud-config
 # Runs on the KVM host at boot: pull the lab guest image and define/start it.
-# The AMI (built by hv-testbed-images/packer/kvm-host) already has
+# The AMI (built by hyperforge-bakery/packer/kvm-host) already has
 # qemu-kvm, libvirt, virt-install, and the aws cli installed, and nested
 # virtualization verified at bake time.
 
@@ -19,4 +19,4 @@ runcmd:
       --network network=default,model=virtio \
       --graphics none \
       --noautoconsole
-  - touch /var/run/hv-testbed-guest-started
+  - touch /var/run/hyperforge-guest-started

@@ -4,7 +4,7 @@ data "aws_ami" "kvm_host" {
 
   filter {
     name   = "name"
-    values = ["hv-testbed-kvm-host-*"]
+    values = ["hyperforge-kvm-host-*"]
   }
 }
 
@@ -32,7 +32,7 @@ resource "aws_spot_instance_request" "kvm_host" {
   })
 
   tags = merge(var.tags, {
-    Name            = "hv-testbed-kvm-${var.run_id}"
+    Name            = "hyperforge-kvm-${var.run_id}"
     ephemeral-test  = "true"
     run-id          = var.run_id
     ttl-expires-at  = timeadd(timestamp(), var.ttl)
@@ -48,7 +48,7 @@ resource "aws_spot_instance_request" "kvm_host" {
 # so the TTL reaper can find it.
 resource "aws_ec2_tag" "instance_tags" {
   for_each = merge(var.tags, {
-    Name           = "hv-testbed-kvm-${var.run_id}"
+    Name           = "hyperforge-kvm-${var.run_id}"
     ephemeral-test = "true"
     run-id         = var.run_id
     hypervisor-leg = var.hypervisor_leg

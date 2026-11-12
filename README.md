@@ -1,9 +1,9 @@
-# hv-testbed-infra
+# hyperforge-core
 
 Terraform for ephemeral hypervisor test hosts on AWS. Each CI run provisions a
 host, runs the e2e suite against a lab guest VM, and destroys everything.
-Companion repos: `hv-testbed-images` (golden AMIs + lab guest images),
-`hv-testbed-e2e` (CI orchestration).
+Companion repos: `hyperforge-bakery` (golden AMIs + lab guest images),
+`hyperforge-flows` (CI orchestration).
 
 ## Layout
 

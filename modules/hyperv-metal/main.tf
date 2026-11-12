@@ -4,7 +4,7 @@ data "aws_ami" "hyperv_host" {
 
   filter {
     name   = "name"
-    values = ["hv-testbed-hyperv-host-*"]
+    values = ["hyperforge-hyperv-host-*"]
   }
 }
 
@@ -33,7 +33,7 @@ resource "aws_instance" "hyperv_host" {
   })
 
   tags = merge(var.tags, {
-    Name           = "hv-testbed-hyperv-${var.run_id}"
+    Name           = "hyperforge-hyperv-${var.run_id}"
     ephemeral-test = "true"
     run-id         = var.run_id
     ttl-expires-at = timeadd(timestamp(), var.ttl)

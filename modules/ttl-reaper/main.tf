@@ -5,7 +5,7 @@ data "archive_file" "reaper" {
 }
 
 resource "aws_iam_role" "reaper" {
-  name = "hv-testbed-ttl-reaper"
+  name = "hyperforge-ttl-reaper"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -18,7 +18,7 @@ resource "aws_iam_role" "reaper" {
 }
 
 resource "aws_iam_role_policy" "reaper" {
-  name = "hv-testbed-ttl-reaper"
+  name = "hyperforge-ttl-reaper"
   role = aws_iam_role.reaper.id
 
   policy = jsonencode({
@@ -48,7 +48,7 @@ resource "aws_iam_role_policy" "reaper" {
 }
 
 resource "aws_lambda_function" "reaper" {
-  function_name    = "hv-testbed-ttl-reaper"
+  function_name    = "hyperforge-ttl-reaper"
   role             = aws_iam_role.reaper.arn
   runtime          = "python3.12"
   handler          = "reaper.handler"
@@ -64,7 +64,7 @@ resource "aws_lambda_function" "reaper" {
 }
 
 resource "aws_cloudwatch_event_rule" "schedule" {
-  name                = "hv-testbed-ttl-reaper"
+  name                = "hyperforge-ttl-reaper"
   schedule_expression = var.schedule_expression
 }
 

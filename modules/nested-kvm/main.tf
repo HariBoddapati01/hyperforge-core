@@ -29,6 +29,7 @@ resource "aws_spot_instance_request" "kvm_host" {
     guest_name       = var.guest_name
     guest_memory_mb  = var.guest_memory_mb
     guest_vcpus      = var.guest_vcpus
+    extra_disk_gb    = var.guest_extra_disk_gb
   })
 
   tags = merge(var.tags, {

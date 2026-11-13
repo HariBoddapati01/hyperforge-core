@@ -4,11 +4,11 @@ variable "run_id" {
 }
 
 variable "hypervisor_leg" {
-  description = "Which matrix leg this host serves: kvm or vme."
+  description = "Which matrix leg this host serves: kvm, vme, or ahv."
   type        = string
   validation {
-    condition     = contains(["kvm", "vme"], var.hypervisor_leg)
-    error_message = "hypervisor_leg must be kvm or vme (hyperv uses the hyperv-metal module)."
+    condition     = contains(["kvm", "vme", "ahv"], var.hypervisor_leg)
+    error_message = "hypervisor_leg must be kvm, vme, or ahv (hyperv uses the hyperv-metal module)."
   }
 }
 
@@ -56,6 +56,12 @@ variable "guest_memory_mb" {
 variable "guest_vcpus" {
   type    = number
   default = 8
+}
+
+variable "guest_extra_disk_gb" {
+  description = "Sizes (GB) of empty data disks created and attached to the guest, in order. Nutanix CE needs its hot/cold tiers, e.g. [200, 500]."
+  type        = list(number)
+  default     = []
 }
 
 variable "ttl" {

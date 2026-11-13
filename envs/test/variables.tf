@@ -9,11 +9,11 @@ variable "run_id" {
 }
 
 variable "leg" {
-  description = "Matrix leg: kvm, vme, or hyperv."
+  description = "Matrix leg: kvm, vme, ahv, or hyperv."
   type        = string
   validation {
-    condition     = contains(["kvm", "vme", "hyperv"], var.leg)
-    error_message = "leg must be one of: kvm, vme, hyperv."
+    condition     = contains(["kvm", "vme", "ahv", "hyperv"], var.leg)
+    error_message = "leg must be one of: kvm, vme, ahv, hyperv."
   }
 }
 

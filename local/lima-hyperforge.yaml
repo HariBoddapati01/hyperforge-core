@@ -1,0 +1,51 @@
+# Local nested-hypervisor host for HyperForge development on Apple Silicon.
+#
+# Topology mirrors the cloud kvm/vme leg, one level deeper than usual:
+#   macOS (M3+, Virtualization.framework, nested virt on)
+#     └─ this VM: Ubuntu 24.04 arm64 + libvirt/QEMU   (≈ the kvm-host AMI)
+#          └─ nested guest VM via virt-install         (≈ the lab guest)
+#
+# Requires: Apple M3 or newer, macOS 15+, Lima with vmType vz.
+# Packages match hyperforge-bakery/packer/kvm-host/provision.sh so what we
+# validate here is the same host stack the cloud leg runs.
+
+vmType: "vz"
+nestedVirtualization: true
+
+cpus: 4
+memory: "8GiB"
+disk: "60GiB"
+
+images:
+  - location: "https://cloud-images.ubuntu.com/noble/current/noble-server-cloudimg-arm64.img"
+    arch: "aarch64"
+
+mounts:
+  - location: "~/hyperforge"
+    writable: false
+
+provision:
+  - mode: system
+    script: |
+      #!/bin/bash
+      set -eux
+      export DEBIAN_FRONTEND=noninteractive
+      apt-get update
+      apt-get install -y \
+        qemu-kvm \
+        libvirt-daemon-system \
+        libvirt-clients \
+        virtinst \
+        bridge-utils \
+        cloud-image-utils \
+        jq
+      systemctl enable --now libvirtd
+      virsh net-autostart default || true
+      virsh net-start default || true
+      usermod -aG libvirt,kvm "${LIMA_CIDATA_USER:-$(id -un 1000)}" || true
+
+probes:
+  - description: "libvirtd is running"
+    script: |
+      #!/bin/bash
+      until systemctl is-active -q libvirtd; do sleep 3; done

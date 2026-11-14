@@ -1,7 +1,10 @@
 # HyperForge · core
 
+[![localtest](https://github.com/HariBoddapati01/hyperforge-core/actions/workflows/localtest.yml/badge.svg)](https://github.com/HariBoddapati01/hyperforge-core/actions/workflows/localtest.yml) [![License: Apache-2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
+
 **Ephemeral hypervisor test infrastructure on AWS.** HyperForge recreates
-lab-hosted virtual machines (KVM, Hyper-V, HPE VM Essentials) in the cloud for
+lab-hosted virtual machines (KVM, Hyper-V, HPE VM Essentials, Nutanix
+AHV/AOS, KubeVirt) in the cloud for
 end-to-end product testing: every CI run forges a fresh hypervisor host, boots
 a golden copy of the lab guest VM, deploys the product build, runs the e2e
 suite, and destroys everything. Nothing persists between runs except images,
@@ -23,7 +26,7 @@ the hosts, and the safety net that guarantees nothing outlives its welcome.
 ```mermaid
 flowchart LR
     subgraph flows["hyperforge-flows (CI)"]
-        A[matrix leg:<br/>kvm / vme / hyperv] --> B[terraform apply]
+        A[matrix leg:<br/>kvm / vme / ahv /<br/>kubevirt / hyperv] --> B[terraform apply]
         B --> C[wait for guest]
         C --> D[deploy product]
         D --> E[run e2e suite]
@@ -56,8 +59,9 @@ flowchart LR
 profiles/
   kvm.yaml        One YAML per hypervisor — the single source of truth for
   vme.yaml        platform, host image, instance type, spot/on-demand,
-  ahv.yaml        disks, and guest sizing. The module, the bakery build,
-  hyperv.yaml     and CI all read from here.
+  ahv.yaml        disks, guest sizing, and (optionally) a custom userdata
+  kubevirt.yaml   template. The module, the bakery build, and CI all read
+  hyperv.yaml     from here.
 modules/
   hypervisor-host/  ONE module for every hypervisor: interprets the profile
                     (Linux cloud-init vs Windows userdata, spot vs on-demand,
@@ -80,11 +84,12 @@ stack (like AHV and VME ride the kvm-host image), you're done.
 
 AWS does **not** support nested virtualization on regular EC2 instances —
 `/dev/kvm` does not exist there, and Hyper-V's hardware requirements are
-stricter still. Both modules therefore default to bare-metal types:
+stricter still. Every profile therefore defaults to a bare-metal type:
 
 | Leg | Default type | Pricing | Rationale |
 |-----|-------------|---------|-----------|
-| `kvm` / `vme` | `c6i.metal` | Spot (one-time) | Interruption is cheap: runs are idempotent and re-triggerable |
+| `kvm` / `vme` / `kubevirt` | `c6i.metal` | Spot (one-time) | Interruption is cheap: runs are idempotent and re-triggerable |
+| `ahv` | `i4i.metal` | On-demand | Nutanix CE's long boot makes interruptions expensive; local NVMe suits its storage tiers |
 | `hyperv` | `m6i.metal` | On-demand | Metal Spot capacity is scarce; an interruption wastes ~10 min of provisioning |
 
 If metal pricing becomes the dominant cost, the KVM/VME legs are portable to
@@ -125,7 +130,7 @@ cd envs/test
 terraform init -backend-config=...   # per-run key, see above
 terraform apply -auto-approve \
   -var "run_id=${RUN_ID}" \
-  -var "leg=kvm" \                   # kvm | vme | hyperv
+  -var "leg=kvm" \                   # any profiles/*.yaml basename
   -var "subnet_id=subnet-..." \
   -var "security_group_id=sg-..." \
   -var "lab_image_s3_uri=s3://hyperforge-golden-images/golden/kvm/<sha>.qcow2"

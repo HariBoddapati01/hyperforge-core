@@ -1,0 +1,42 @@
+name: localtest
+
+# Runs the real Terraform roots against a local moto AWS mock: every profile
+# through apply -> assert -> destroy, plus the TTL reaper's kill logic.
+# No AWS account, no credentials, no cost.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  localtest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_wrapper: false
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Cache localtest venv
+        uses: actions/cache@v4
+        with:
+          path: localtest/.venv
+          key: localtest-venv-${{ runner.os }}-py312-v1
+
+      - name: Run localtest suite
+        run: ./localtest/run.sh
+
+      - name: Upload moto log on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: moto-log
+          path: localtest/moto.log
+          if-no-files-found: ignore

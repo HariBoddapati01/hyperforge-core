@@ -33,7 +33,7 @@ def main():
         key = f"golden/{leg}/deadbeef.{ext}"
         s3.put_object(Bucket="hyperforge-golden-images", Key=key, Body=b"fake-image")
 
-    for prefix in ("hyperforge-kvm-host", "hyperforge-hyperv-host"):
+    for prefix in ("hyperforge-kvm-host", "hyperforge-hyperv-host", "hyperforge-kubevirt-host"):
         ec2.register_image(
             Name=f"{prefix}-1700000000",
             Architecture="x86_64",

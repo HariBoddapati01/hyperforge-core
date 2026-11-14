@@ -1,0 +1,18 @@
+# HyperForge hypervisor profile: KubeVirt (CNCF-graduated, Kubernetes-native).
+# Host = Linux metal + k3s, with the KubeVirt operator applied at boot; the
+# lab guest runs as a VirtualMachine CR backed by the downloaded qcow2
+# (hostDisk). virt-handler needs /dev/kvm, hence .metal like every leg.
+
+platform: linux
+host_image: kubevirt-host
+host_ami_prefix: hyperforge-kubevirt-host
+instance_type: c6i.metal
+purchase: spot
+root_volume_gb: 300
+image_ext: qcow2
+userdata_template: kubevirt.yaml.tpl
+
+guest:
+  memory_mb: 16384
+  vcpus: 8
+  extra_disk_gb: []

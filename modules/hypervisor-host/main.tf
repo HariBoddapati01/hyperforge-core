@@ -15,8 +15,17 @@ locals {
     extra_disk_gb = var.guest_extra_disk_gb != null ? var.guest_extra_disk_gb : local.profile.guest.extra_disk_gb
   }
 
+  # A profile may name its own userdata template (e.g. kubevirt applies a
+  # VirtualMachine CR instead of running virt-install); otherwise the
+  # platform default applies.
+  userdata_template = lookup(
+    local.profile,
+    "userdata_template",
+    local.profile.platform == "windows" ? "userdata.ps1.tpl" : "cloud-init.yaml.tpl",
+  )
+
   user_data = templatefile(
-    "${path.module}/templates/${local.profile.platform == "windows" ? "userdata.ps1.tpl" : "cloud-init.yaml.tpl"}",
+    "${path.module}/templates/${local.userdata_template}",
     {
       lab_image_s3_uri = var.lab_image_s3_uri
       guest_name       = var.guest_name

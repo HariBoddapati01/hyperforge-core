@@ -74,3 +74,9 @@ variable "tags" {
   type    = map(string)
   default = {}
 }
+
+variable "iam_instance_profile" {
+  description = "Instance profile granting SSM access and golden-image reads (from envs/shared)."
+  type        = string
+  default     = "hyperforge-test-host"
+}

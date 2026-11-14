@@ -18,6 +18,7 @@ resource "aws_instance" "hyperv_host" {
   subnet_id              = var.subnet_id
   vpc_security_group_ids = [var.security_group_id]
   key_name               = var.key_name
+  iam_instance_profile   = var.iam_instance_profile
   get_password_data      = false # CI uses SSM, not RDP
 
   root_block_device {

@@ -60,6 +60,7 @@ modules/
   ttl-reaper/     Lambda + EventBridge schedule: kills expired test instances
 envs/
   test/           Root module invoked per CI run (one leg per state file)
+  shared/         One-time account bootstrap: buckets, network, OIDC, reaper
 ```
 
 ## Why every leg runs on `.metal`
@@ -119,19 +120,28 @@ terraform apply -auto-approve \
 terraform destroy -auto-approve -var ...   # same vars
 ```
 
-## One-time account setup (prerequisites)
+## One-time account setup
 
-- S3 buckets: `hyperforge-tfstate`, `hyperforge-golden-images`
-- VPC/subnet/SG for test hosts (SG: egress-only; host access via SSM, no inbound)
-- GitHub Actions OIDC role (`AWS_CI_ROLE_ARN` secret in hyperforge-flows)
-- Instance profile with SSM + S3-read for test hosts
-- **Service quota headroom**: `.metal` instances count against On-Demand/Spot
-  vCPU quotas — one `c6i.metal` is 128 vCPUs. Request increases before first run.
-- Deploy `modules/ttl-reaper` once per account (standalone root or an
-  `envs/shared`).
+`envs/shared` is the single apply that bootstraps the account — run it once
+with admin credentials (not CI):
+
+```sh
+cd envs/shared && terraform init && terraform apply
+```
+
+It creates the S3 buckets (versioned state with 90-day run-state expiry),
+the egress-only test network (public subnet, no NAT gateway cost), the
+test-host instance profile (SSM + golden-image reads), the GitHub OIDC
+provider + CI role scoped to `hyperforge-flows`, and the TTL reaper (in
+dry-run until you flip it). Its outputs map 1:1 onto the three GitHub
+secrets hyperforge-flows needs.
+
+Still manual: **service quota headroom** — `.metal` instances count against
+On-Demand/Spot vCPU quotas (one `c6i.metal` is 128 vCPUs). Request increases
+before the first run.
 
 ## Status
 
 - [x] Terraform modules validated (`terraform validate`, AWS provider ~> 5.0)
-- [ ] One-time account setup (`envs/shared`) not yet written
+- [x] One-time account bootstrap written (`envs/shared`) — not yet applied
 - [ ] First real run pending golden images from hyperforge-bakery

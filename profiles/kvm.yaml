@@ -1,0 +1,16 @@
+# HyperForge hypervisor profile: plain KVM/libvirt.
+# A profile is the single source of truth for one hypervisor — the
+# hypervisor-host module, the bakery build, and CI all read from here.
+
+platform: linux            # linux | windows — picks userdata flavor and host image
+host_image: kvm-host       # hyperforge-bakery/packer/<host_image> bakes the host AMI
+host_ami_prefix: hyperforge-kvm-host
+instance_type: c6i.metal   # nested virt requires .metal on AWS
+purchase: spot             # spot | ondemand
+root_volume_gb: 200
+image_ext: qcow2
+
+guest:
+  memory_mb: 16384
+  vcpus: 8
+  extra_disk_gb: []

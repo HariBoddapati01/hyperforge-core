@@ -1,0 +1,17 @@
+# HyperForge hypervisor profile: Microsoft Hyper-V.
+# Windows Server bare metal — Hyper-V needs real VT-x/SLAT; nested-on-Nitro
+# is not reliable, so this is the one profile that is Hyper-V-on-hardware
+# rather than hypervisor-on-KVM.
+
+platform: windows
+host_image: hyperv-host
+host_ami_prefix: hyperforge-hyperv-host
+instance_type: m6i.metal
+purchase: ondemand         # metal Spot is scarce; interruption wastes ~10min provision
+root_volume_gb: 300
+image_ext: vhdx
+
+guest:
+  memory_mb: 16384
+  vcpus: 8
+  extra_disk_gb: []

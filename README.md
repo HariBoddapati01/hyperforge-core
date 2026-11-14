@@ -53,15 +53,28 @@ flowchart LR
 ## Repository layout
 
 ```
+profiles/
+  kvm.yaml        One YAML per hypervisor — the single source of truth for
+  vme.yaml        platform, host image, instance type, spot/on-demand,
+  ahv.yaml        disks, and guest sizing. The module, the bakery build,
+  hyperv.yaml     and CI all read from here.
 modules/
-  nested-kvm/     KVM + HPE VME leg — Linux host running libvirt/QEMU guests
-                  (VME is KVM-based, so both legs share this module)
-  hyperv-metal/   Hyper-V leg — Windows Server bare-metal host
-  ttl-reaper/     Lambda + EventBridge schedule: kills expired test instances
+  hypervisor-host/  ONE module for every hypervisor: interprets the profile
+                    (Linux cloud-init vs Windows userdata, spot vs on-demand,
+                    multi-disk guests, VT-x passthrough for nested products)
+  ttl-reaper/       Lambda + EventBridge schedule: kills expired test instances
 envs/
   test/           Root module invoked per CI run (one leg per state file)
   shared/         One-time account bootstrap: buckets, network, OIDC, reaper
 ```
+
+## Adding a hypervisor
+
+Write `profiles/<name>.yaml` (copy the closest existing one). That's the
+whole change on this repo: the `leg` validation, the module, and CI pick it
+up from the file. If it needs a new host OS stack, add a matching
+`packer/<host_image>` build in hyperforge-bakery; if it runs on an existing
+stack (like AHV and VME ride the kvm-host image), you're done.
 
 ## Why every leg runs on `.metal`
 

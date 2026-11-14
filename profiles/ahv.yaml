@@ -1,0 +1,16 @@
+# HyperForge hypervisor profile: Nutanix AHV/AOS (Community Edition).
+# CE runs as a nested VM on the Linux KVM host; its CVM alone pins ~20GB,
+# and it needs hot/cold data tiers beyond the boot disk.
+
+platform: linux
+host_image: kvm-host
+host_ami_prefix: hyperforge-kvm-host
+instance_type: i4i.metal   # local NVMe suits CE's storage tiers
+purchase: ondemand         # CE boot is long; a spot interruption wastes too much
+root_volume_gb: 1000       # boot image + 200G + 500G data tiers live on the host
+image_ext: qcow2
+
+guest:
+  memory_mb: 49152
+  vcpus: 12
+  extra_disk_gb: [200, 500]

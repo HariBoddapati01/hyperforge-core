@@ -9,11 +9,11 @@ variable "run_id" {
 }
 
 variable "leg" {
-  description = "Matrix leg: kvm, vme, ahv, or hyperv."
+  description = "Matrix leg — any hypervisor with a profiles/<name>.yaml file."
   type        = string
   validation {
-    condition     = contains(["kvm", "vme", "ahv", "hyperv"], var.leg)
-    error_message = "leg must be one of: kvm, vme, ahv, hyperv."
+    condition     = contains([for f in fileset("${path.root}/../../profiles", "*.yaml") : trimsuffix(f, ".yaml")], var.leg)
+    error_message = "leg must match a profile in profiles/ (one of the *.yaml basenames)."
   }
 }
 

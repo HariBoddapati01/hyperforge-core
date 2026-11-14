@@ -1,0 +1,16 @@
+# HyperForge hypervisor profile: HPE VM Essentials.
+# VME is KVM-based: same Linux host stack as the kvm profile; the golden
+# image carries the VME manager appliance + HVM host (see bakery docs).
+
+platform: linux
+host_image: kvm-host
+host_ami_prefix: hyperforge-kvm-host
+instance_type: c6i.metal
+purchase: spot
+root_volume_gb: 300
+image_ext: qcow2
+
+guest:
+  memory_mb: 24576         # headroom for the Morpheus-based manager appliance
+  vcpus: 8
+  extra_disk_gb: []
